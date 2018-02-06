@@ -1,0 +1,3 @@
+The unpickle function in utils/external.py does not have an associated
+license. It is from https://www.cs.toronto.edu/~kriz/cifar.html
+
