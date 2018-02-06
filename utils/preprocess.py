@@ -27,6 +27,7 @@
 # Copyright (C), Visual Computing Group @ University of Victoria.
 
 # Code:
+from scipy import stats
 
 import numpy as np
 
@@ -69,11 +70,19 @@ def normalize(data, data_mean=None, data_range=None):
     # Make data float, just in case
     data_f = data.astype(float)
 
-    # TODO: Compute mean if needed
-    # TODO: Make zero mean
+    # Compute mean if needed
+    if not data_mean:
+        data_mean = data_f.mean()
 
-    # TODO: Compute maximum deviation from zero if needed
-    # TODO: Divide with the range
+    # Make zero mean
+    data_f = stats.zscore(data_f)
+
+    # Compute maximum deviation from zero if needed
+    if not data_range:
+        data_range = np.ptp(data_f)
+
+    # Divide with the range
+    data_n = data_f / data_range
 
     return data_n, data_mean, data_range
 

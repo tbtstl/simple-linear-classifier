@@ -7,6 +7,17 @@ from utils.preprocess import normalize
 from utils.regularizor import l2_grad, l2_loss
 
 
+def _shuffle(a, b):
+    assert len(a) == len(b), "Arrays must be of equal length."
+    shuffled_a = np.empty(a.shape, dtype=a.dtype)
+    shuffled_b = np.empty(b.shape, dtype=b.dtype)
+    permutation = np.random.permutation(len(a))
+    for old_index, new_index in enumerate(permutation):
+        shuffled_a[new_index] = a[old_index]
+        shuffled_b[new_index] = b[old_index]
+    return shuffled_a, shuffled_b
+
+
 def compute_loss(W, b, x, y, config):
     """Computes the losses for each module."""
 
@@ -240,7 +251,7 @@ def main(config):
     # TODO: Randomly shuffle data and labels. IMPORANT: make sure the data and
     # label is shuffled with the same random indices so that they don't get
     # mixed up!
-    TODO
+    x_trva, y_trva = _shuffle(x_trva, y_trva)
 
     # Reshape the data into 5x(N/5)xD, so that the first dimension is the fold
     x_trva = np.reshape(x_trva, (num_fold, len(x_trva) // num_fold, -1))
@@ -260,10 +271,10 @@ def main(config):
     for idx_va_fold in va_fold_to_test:
         # TODO: Select train and validation. Notice that `idx_va_fold` will be
         # the fold that you use as validation set for this experiment
-        x_tr = TODO
-        x_va = TODO
-        y_tr = TODO
-        y_va = TODO
+        x_tr = np.delete(x_trva, idx_va_fold)
+        x_va = np.copy(x_trva[idx_va_fold])
+        y_tr = np.delete(y_trva, idx_va_fold)
+        y_va = np.copy(y_trva[idx_va_fold])
 
         # ----------------------------------------
         # Train
