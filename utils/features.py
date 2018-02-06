@@ -19,11 +19,25 @@ def extract_h_histogram(data):
 
     """
 
-    # TODO: Convert data into hsv's, and take only the h
+    # Convert data into hsv's, and take only the h
+    nh = []
+    for idx, image in enumerate(data):
+        hsv = rgb2hsv(image)
+        nh.append(np.delete(hsv, np.s_[1:], 2))
+    nh = np.array(nh)
 
-    # TODO: Create bins to be used
+    # Create bins to be used
+    start = np.amin(nh)
+    stop = np.amax(nh)
+    bins = np.linspace(start, stop, num=15)
 
-    # TODO: Create histogram
+    # Create histogram
+    h_hist=[]
+    for hue_img in nh:
+        hist, _ = np.histogram(hue_img, bins)
+        h_hist.append(hist)
+
+    h_hist = np.array(h_hist)
 
     return h_hist
 
