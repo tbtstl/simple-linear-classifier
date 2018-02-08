@@ -151,7 +151,7 @@ def train(x_tr, y_tr, x_va, y_va, config):
     num_class = 10
 
     # Initialize W to very small random values.
-    W = np.random.uniform(-0.001, 0.001, (x_tr_n.shape + (num_class,)))
+    W = np.random.rand(np.prod(x_tr_n.shape[1:]), num_class) - 0.5
 
     # Initialize b to zeros
     b = np.zeros(num_class)
@@ -279,9 +279,13 @@ def main(config):
         # the fold that you use as validation set for this experiment
         va_idx = [i for i in range(num_fold) if i != idx_va_fold]
         x_tr = np.delete(x_trva, idx_va_fold, 0)
+        x_tr = x_tr.reshape(-1, x_tr.shape[-1])
         y_tr = np.delete(y_trva, idx_va_fold, 0)
+        y_tr = y_tr.reshape(-1, y_tr.shape[-1])
         x_va = np.delete(x_trva, va_idx, 0)
+        x_va = x_va.reshape(-1, x_va.shape[-1])
         y_va = np.delete(y_trva, va_idx, 0)
+        y_va = y_va.reshape(-1, y_va.shape[-1])
 
         # ----------------------------------------
         # Train
