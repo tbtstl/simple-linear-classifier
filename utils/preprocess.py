@@ -71,14 +71,14 @@ def normalize(data, data_mean=None, data_range=None):
     data_f = data.astype(float)
 
     # Compute mean if needed
-    if not data_mean:
-        data_mean = data_f.mean()
+    if data_mean is None:
+        data_mean = np.mean(data_f)
 
     # Make zero mean
-    data_f = stats.zscore(data_f)
+    data_f = (data_f - data_mean) / np.std(data_f)
 
     # Compute maximum deviation from zero if needed
-    if not data_range:
+    if data_range is None:
         data_range = np.ptp(data_f)
 
     # Divide with the range

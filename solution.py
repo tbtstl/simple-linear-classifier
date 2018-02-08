@@ -86,12 +86,17 @@ def predict(W, b, x, config):
 
     """
 
-    # TODO: Lazy import of propper model
+    # Lazy import of proper model
+    model = None
 
-    # TODO: use model_predict
+    if config.model_type == 'linear_svm':
+        import utils.linear_svm as model
+    elif config.model_type == 'logistic_regression':
+        import utils.logistic_regression as model
 
+    # use model_predict
+    pred = model.model_predict(W, b, x)
     return pred
-
 
 def train(x_tr, y_tr, x_va, y_va, config):
     """Training function.
@@ -144,14 +149,17 @@ def train(x_tr, y_tr, x_va, y_va, config):
     # Initialize parameters of the classifier
     print("Initializing...")
     num_class = 10
-    # TODO: Initialize W to very small random values. e.g. random values between
-    # -0.001 and 0.001
-    W = TODO
-    # TODO: Initialize b to zeros
-    b = TODO
+
+    # Initialize W to very small random values.
+    W = np.random.uniform(-0.001, 0.001, (x_tr_n.shape + (num_class,)))
+
+    # Initialize b to zeros
+    b = np.zeros(num_class)
 
     print("Testing...")
-    # TOOD: Test on validation data
+    # Test on validation data
+    prediction = predict(W, b, x_tr_n, config)
+    acc = None
     print("Initial Validation Accuracy: {}%".format(acc * 100))
 
     batch_size = config.batch_size
@@ -248,9 +256,7 @@ def main(config):
     # Create folds
     num_fold = 5
 
-    # TODO: Randomly shuffle data and labels. IMPORANT: make sure the data and
-    # label is shuffled with the same random indices so that they don't get
-    # mixed up!
+    # Randomly shuffle data and labels.
     x_trva, y_trva = _shuffle(x_trva, y_trva)
 
     # Reshape the data into 5x(N/5)xD, so that the first dimension is the fold
@@ -271,10 +277,11 @@ def main(config):
     for idx_va_fold in va_fold_to_test:
         # TODO: Select train and validation. Notice that `idx_va_fold` will be
         # the fold that you use as validation set for this experiment
-        x_tr = np.delete(x_trva, idx_va_fold)
-        x_va = np.copy(x_trva[idx_va_fold])
-        y_tr = np.delete(y_trva, idx_va_fold)
-        y_va = np.copy(y_trva[idx_va_fold])
+        va_idx = [i for i in range(num_fold) if i != idx_va_fold]
+        x_tr = np.delete(x_trva, idx_va_fold, 0)
+        y_tr = np.delete(y_trva, idx_va_fold, 0)
+        x_va = np.delete(x_trva, va_idx, 0)
+        y_va = np.delete(y_trva, va_idx, 0)
 
         # ----------------------------------------
         # Train

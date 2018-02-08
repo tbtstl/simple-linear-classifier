@@ -2,6 +2,8 @@ import numpy as np
 from skimage.color import rgb2hsv
 from skimage.feature import hog
 
+from matplotlib import pyplot as plt
+
 
 def extract_h_histogram(data):
     """Extract Hue Histograms from data.
