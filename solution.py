@@ -158,9 +158,12 @@ def train(x_tr, y_tr, x_va, y_va, config):
 
     print("Testing...")
     # Test on validation data
-    prediction = predict(W, b, x_tr_n, config)
-    acc = None
-    print("Initial Validation Accuracy: {}%".format(acc * 100))
+    prediction = predict(W, b, x_va_n, config)
+    prediction = prediction.reshape(y_va.shape)
+    correct_pred_count = np.sum(prediction == y_va)
+
+    acc = (correct_pred_count/float(y_va.shape[1]))*100
+    print("Initial Validation Accuracy: {}%".format(acc))
 
     batch_size = config.batch_size
     num_epoch = config.num_epoch
