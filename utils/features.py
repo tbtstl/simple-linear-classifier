@@ -25,7 +25,7 @@ def extract_h_histogram(data):
     nh = []
     for idx, image in enumerate(data):
         hsv = rgb2hsv(image)
-        nh.append(np.delete(hsv, np.s_[1:], 2))
+        nh.append(np.delete(hsv, [1,2], 2))
     nh = np.array(nh)
 
     # Create bins to be used
@@ -40,6 +40,10 @@ def extract_h_histogram(data):
         h_hist.append(hist)
 
     h_hist = np.array(h_hist)
+
+    # plt.figure()
+    # plt.hist(h_hist[0])
+    # plt.show()
 
     return h_hist
 

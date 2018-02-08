@@ -151,7 +151,7 @@ def train(x_tr, y_tr, x_va, y_va, config):
     num_class = 10
 
     # Initialize W to very small random values.
-    W = np.random.rand(np.prod(x_tr_n.shape[1:]), num_class) - 0.5
+    W = (np.random.rand(np.prod(x_tr_n.shape[1:]), num_class) - 0.5)*0.002
 
     # Initialize b to zeros
     b = np.zeros(num_class)
