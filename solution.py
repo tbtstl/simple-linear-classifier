@@ -214,7 +214,7 @@ def train(x_tr, y_tr, x_va, y_va, config):
         print("Epoch {} -- Train Accuracy: {:.2f}%".format(
             idx_epoch, np.mean(accs) * 100))
 
-        # TODO: Test on validation data and report results
+        # Test on validation data and report results
         prediction = predict(W, b, x_va_n, config)
         correct_pred_count = np.sum(prediction == y_va)
         acc = (correct_pred_count / float(y_va.shape[0]))
@@ -222,19 +222,19 @@ def train(x_tr, y_tr, x_va, y_va, config):
         print("Epoch {} -- Validation Accuracy: {:.2f}%".format(
             idx_epoch, acc * 100))
 
-        # TODO: If best validation accuracy, update W_best, b_best, and best
+        # If best validation accuracy, update W_best, b_best, and best
         # accuracy. We will only return the best W and b
         if acc > best_acc:
             W_best = W
             b_best = b
             best_acc = acc
 
-        # TODO: Record per epoch statistics
+        # Record per epoch statistics
         loss_epoch += [losses.mean()]
         tr_acc_epoch += [accs.mean()]
         va_acc_epoch += [acc]
 
-    # TODO: Pack results. Remeber to pack pre-processing related things here as
+    # Pack results. Remeber to pack pre-processing related things here as
     # well
     train_res = {
         'W_best': W_best,
