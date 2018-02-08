@@ -159,10 +159,10 @@ def train(x_tr, y_tr, x_va, y_va, config):
     print("Testing...")
     # Test on validation data
     prediction = predict(W, b, x_va_n, config)
-    prediction = prediction.reshape(y_va.shape)
+    # prediction = prediction.reshape(y_va.shape)
     correct_pred_count = np.sum(prediction == y_va)
 
-    acc = (correct_pred_count/float(y_va.shape[1]))*100
+    acc = (correct_pred_count/float(y_va.shape[0]))*100
     print("Initial Validation Accuracy: {}%".format(acc))
 
     batch_size = config.batch_size
@@ -176,24 +176,37 @@ def train(x_tr, y_tr, x_va, y_va, config):
     best_acc = 0
     # For each epoch
     for idx_epoch in range(num_epoch):
-        # TODO: Create a random order to go through the data
-        # TODO: For each training batch
+        # Create a random order to go through the data
+        order = np.arange(num_batch)
+        np.random.shuffle(order)
+
         losses = np.zeros(num_batch)
         accs = np.zeros(num_batch)
         for idx_batch in range(num_batch):
-            # TODO: Construct batch
-            x_b = TODO
-            y_b = TODO
+            # Construct batch
+            idx = order[idx_batch]
+            if idx+batch_size > y_tr.shape[0]:
+                x_b = np.copy(x_tr_n[idx:])
+                y_b = np.copy(y_tr[idx:])
+            else:
+                x_b = np.copy(x_tr_n[idx:idx+batch_size])
+                y_b = np.copy(y_tr[idx:idx+batch_size])
+
             # Get loss with compute_loss
             loss_cur, loss_c, pred_b = compute_loss(W, b, x_b, y_b, config)
             # Get gradient with compute_grad
             dW, db = compute_grad(W, x_b, y_b, loss_c, config)
-            # TODO: Update parameters
-            W = TODO
-            b = TODO
-            # TODO: Record this batches result
-            losses[idx_batch] = TODO
-            accs[idx_batch] = TODO
+
+            # Update parameters
+            W -= (dW*config.learning_rate)
+            b -= (db*config.learning_rate)
+
+            # Record this batches result
+            correct_pred_count = np.sum(pred_b == y_b)
+            acc = (correct_pred_count / float(y_b.shape[0]))
+
+            losses[idx_batch] = loss_cur
+            accs[idx_batch] = acc
 
         # Report average results within this epoch
         print("Epoch {} -- Train Loss: {}".format(
@@ -202,24 +215,37 @@ def train(x_tr, y_tr, x_va, y_va, config):
             idx_epoch, np.mean(accs) * 100))
 
         # TODO: Test on validation data and report results
-        acc = TODO
+        prediction = predict(W, b, x_va_n, config)
+        correct_pred_count = np.sum(prediction == y_va)
+        acc = (correct_pred_count / float(y_va.shape[0]))
+
         print("Epoch {} -- Validation Accuracy: {:.2f}%".format(
             idx_epoch, acc * 100))
 
         # TODO: If best validation accuracy, update W_best, b_best, and best
         # accuracy. We will only return the best W and b
         if acc > best_acc:
-            TODO
+            W_best = W
+            b_best = b
+            best_acc = acc
 
         # TODO: Record per epoch statistics
-        loss_epoch += [TODO]
-        tr_acc_epoch += [TODO]
-        va_acc_epoch += [TODO]
+        loss_epoch += [losses.mean()]
+        tr_acc_epoch += [accs.mean()]
+        va_acc_epoch += [acc]
 
     # TODO: Pack results. Remeber to pack pre-processing related things here as
     # well
-    train_res = {}
-    TODO
+    train_res = {
+        'W_best': W_best,
+        'b_best': b_best,
+        'best_acc': acc,
+        'loss_epoch': loss_epoch,
+        'tr_acc_epoch': tr_acc_epoch,
+        'va_acc_epoch': va_acc_epoch,
+        'x_tr_mean': x_tr_mean,
+        'x_tr_range': x_tr_range
+    }
 
     return train_res
 
@@ -278,17 +304,17 @@ def main(config):
     # Cross validation loop
     train_res = []
     for idx_va_fold in va_fold_to_test:
-        # TODO: Select train and validation. Notice that `idx_va_fold` will be
+        # Select train and validation. Notice that `idx_va_fold` will be
         # the fold that you use as validation set for this experiment
         va_idx = [i for i in range(num_fold) if i != idx_va_fold]
         x_tr = np.delete(x_trva, idx_va_fold, 0)
         x_tr = x_tr.reshape(-1, x_tr.shape[-1])
         y_tr = np.delete(y_trva, idx_va_fold, 0)
-        y_tr = y_tr.reshape(-1, y_tr.shape[-1])
+        y_tr = y_tr.reshape(np.prod(y_tr.shape))
         x_va = np.delete(x_trva, va_idx, 0)
         x_va = x_va.reshape(-1, x_va.shape[-1])
         y_va = np.delete(y_trva, va_idx, 0)
-        y_va = y_va.reshape(-1, y_va.shape[-1])
+        y_va = y_va.reshape(np.prod(y_va.shape))
 
         # ----------------------------------------
         # Train
@@ -306,7 +332,7 @@ def main(config):
     # looking at `loss_epoch` `tr_acc_epoch` and `va_acc_epoch`
     TODO
 
-    # TODO: Find model with best validation accuracy and test it. Remeber you
+    # TODO: Find model with best validation accuracy and test it. Remember you
     # don't want to use this result to make **any** decisions. This is purely
     # the number that you show other people for them to evaluate your model's
     # performance.
