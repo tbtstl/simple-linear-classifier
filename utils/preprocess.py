@@ -72,17 +72,20 @@ def normalize(data, data_mean=None, data_range=None):
 
     # Compute mean if needed
     if data_mean is None:
-        data_mean = np.mean(data_f)
+        data_mean = data_f.mean(axis=0)
 
     # Make zero mean
-    data_f = (data_f - data_mean) / np.std(data_f)
+    std = np.sqrt(np.sum((data_f - data_mean)**2) / data_f.shape[0])
+    data_n = (data_f - data_mean) / std
 
     # Compute maximum deviation from zero if needed
     if data_range is None:
-        data_range = np.ptp(data_f)
+        pos_dev = np.abs(np.max(data_n, axis=0))
+        neg_dev = np.abs(np.min(data_n, axis=0))
+        data_range = np.maximum(pos_dev, neg_dev)
 
     # Divide with the range
-    data_n = data_f / data_range
+    data_n /= data_range
 
     return data_n, data_mean, data_range
 

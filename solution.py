@@ -331,10 +331,11 @@ def main(config):
     # your implementation is working. Do check how the training is going on by
     # looking at `loss_epoch` `tr_acc_epoch` and `va_acc_epoch`
     losses = np.array([tr['loss_epoch'] for tr in train_res])
-    accs = np.array([tr['va_acc_epoch'].max() for tr in train_res])
+    accs = np.array([max(*tr['va_acc_epoch']) for tr in train_res])
     avg_loss = losses.mean()
     avg_acc = accs.mean()
 
+    print('Average Loss: {}\nAverage Accuracy: {:.2f}%'.format(avg_loss, avg_acc*100))
 
     # Find model with best validation accuracy and test it. Remember you
     # don't want to use this result to make **any** decisions. This is purely
