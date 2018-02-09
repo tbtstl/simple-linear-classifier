@@ -325,18 +325,39 @@ def main(config):
         # Save results
         train_res += [cur_train_res]
 
-    # TODO: Average results to see the average performance for this set of
+    # Average results to see the average performance for this set of
     # hyper parameters on the validation set. This will be used to see how good
     # the design was. However, this should all be done *after* you are sure
     # your implementation is working. Do check how the training is going on by
     # looking at `loss_epoch` `tr_acc_epoch` and `va_acc_epoch`
-    TODO
+    losses = np.array([tr['loss_epoch'] for tr in train_res])
+    accs = np.array([tr['va_acc_epoch'].max() for tr in train_res])
+    avg_loss = losses.mean()
+    avg_acc = accs.mean()
 
-    # TODO: Find model with best validation accuracy and test it. Remember you
+
+    # Find model with best validation accuracy and test it. Remember you
     # don't want to use this result to make **any** decisions. This is purely
     # the number that you show other people for them to evaluate your model's
     # performance.
+    best_acc = 0
+    best_model_W = None
+    best_model_b = None
+    x_tr_mean = None
+    x_tr_range = None
+    for tr in train_res:
+        if tr['best_acc'] > best_acc:
+            best_acc = tr['best_acc']
+            best_model_b = tr['b_best']
+            best_model_W = tr['W_best']
+            x_tr_mean = tr['x_tr_mean']
+            x_tr_range = tr['x_tr_range']
 
+    x_te_n, _, _ = normalize(x_te, x_tr_mean, x_tr_range)
+    pred = predict(best_model_W, best_model_b, x_te_n, config)
+    correct_pred_count = np.sum(pred == y_te)
+    acc = (correct_pred_count / float(y_te.shape[0]))
+    print("Testing Results -- Accuracy: {:.2f}%".format(acc*100))
 
 if __name__ == "__main__":
 
