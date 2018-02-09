@@ -1,6 +1,11 @@
 import numpy as np
 
 
+def _softmax(x):
+    """Compute softmax values for each sets of scores in x."""
+    return np.exp(x-np.max(x)) / np.sum(np.exp(x-np.max(x)), axis=0)
+
+
 def model_predict(W, b, x):
     """Prediction function.
 
@@ -78,10 +83,19 @@ def model_loss(W, b, x, y):
     """
 
     # TODO: Compute pred
-    # TODO: Compute probs
-    # TODO: Compute loss
+    pred = model_predict(W, b, x)
+    # pred -= np.max(pred, axis=1, keepdims=True)
 
-    return loss, probs, pred
+    # TODO: Compute probs
+    probs = _softmax(pred)
+    # correct_probs = probs[y]
+
+    # TODO: Compute loss
+    loss_c = -1 * y*np.log(probs) + (1 - y) * np.log(1 - probs)
+    # Summarize across classes that aren't classified correctly
+    loss = np.mean(loss_c)
+
+    return loss, loss_c, pred
 
 
 def model_grad(loss_c, x, y):
@@ -118,7 +132,9 @@ def model_grad(loss_c, x, y):
     N, D = x.shape
     C = loss_c.shape[1]
 
+
     # TODO: Compute dW
+    dW = np.mean((_softmax(x) - y)*x)
 
     # TODO: Compute db
 
