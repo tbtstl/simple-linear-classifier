@@ -325,7 +325,6 @@ def main(config):
     # your implementation is working. Do check how the training is going on by
     # looking at `loss_epoch` `tr_acc_epoch` and `va_acc_epoch`
     losses = np.array([tr['loss_epoch'] for tr in train_res])
-    losses /= len(losses)
     accs = np.array([max(*tr['va_acc_epoch']) for tr in train_res])
     avg_loss = losses.mean()
     avg_acc = accs.mean()
