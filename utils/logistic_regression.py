@@ -94,7 +94,7 @@ def model_loss(W, b, x, y):
     N = y.shape[0]
     targets = np.zeros((N, C))
     targets[np.arange(N), pred] = 1
-    loss = np.mean(targets*np.log(probs))
+    loss = -np.mean(targets*np.log(probs))
 
     return loss, probs, pred
 

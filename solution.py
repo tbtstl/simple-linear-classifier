@@ -31,7 +31,7 @@ def compute_loss(W, b, x, y, config):
             config.model_type))
 
     loss, loss_c, pred = model_loss(W, b, x, y)
-    # loss += config.reg_lambda * l2_loss(W)
+    loss += config.reg_lambda * l2_loss(W)
 
     return loss, loss_c, pred
 
@@ -157,12 +157,11 @@ def train(x_tr, y_tr, x_va, y_va, config):
     b = np.zeros(num_class)
 
     print("Testing...")
+    get_accuracy = lambda p, t: np.sum(p == t) /len(t)
     # Test on validation data
     prediction = predict(W, b, x_va_n, config)
-    # prediction = prediction.reshape(y_va.shape)
-    correct_pred_count = np.sum(prediction == y_va)
 
-    acc = (correct_pred_count/float(y_va.shape[0]))*100
+    acc = get_accuracy(prediction, y_va)
     print("Initial Validation Accuracy: {}%".format(acc))
 
     batch_size = config.batch_size
@@ -177,6 +176,8 @@ def train(x_tr, y_tr, x_va, y_va, config):
     # For each epoch
     for idx_epoch in range(num_epoch):
         # Create a random order to go through the data
+        x_batches = np.split(x_tr_n, num_batch)
+        y_batches = np.split(y_tr, num_batch)
         order = np.arange(num_batch)
         np.random.shuffle(order)
 
@@ -185,13 +186,8 @@ def train(x_tr, y_tr, x_va, y_va, config):
         for idx_batch in range(num_batch):
             # Construct batch
             idx = order[idx_batch]
-            if idx+batch_size > y_tr.shape[0]:
-                x_b = np.copy(x_tr_n[idx:])
-                y_b = np.copy(y_tr[idx:])
-            else:
-                x_b = np.copy(x_tr_n[idx:idx+batch_size])
-                y_b = np.copy(y_tr[idx:idx+batch_size])
-
+            y_b = np.copy(y_batches[idx])
+            x_b = np.copy(x_batches[idx])
             # Get loss with compute_loss
             loss_cur, loss_c, pred_b = compute_loss(W, b, x_b, y_b, config)
             # Get gradient with compute_grad
@@ -202,22 +198,20 @@ def train(x_tr, y_tr, x_va, y_va, config):
             b -= (db*config.learning_rate)
 
             # Record this batches result
-            correct_pred_count = np.sum(pred_b == y_b)
-            acc = (correct_pred_count / float(y_b.shape[0]))
+            acc = get_accuracy(pred_b, y_b)
 
             losses[idx_batch] = loss_cur
             accs[idx_batch] = acc
 
         # Report average results within this epoch
         print("Epoch {} -- Train Loss: {}".format(
-            idx_epoch, np.mean(losses)))
+            idx_epoch, np.mean(losses)/num_batch))
         print("Epoch {} -- Train Accuracy: {:.2f}%".format(
             idx_epoch, np.mean(accs) * 100))
 
         # Test on validation data and report results
         prediction = predict(W, b, x_va_n, config)
-        correct_pred_count = np.sum(prediction == y_va)
-        acc = (correct_pred_count / float(y_va.shape[0]))
+        acc = get_accuracy(prediction, y_va)
 
         print("Epoch {} -- Validation Accuracy: {:.2f}%".format(
             idx_epoch, acc * 100))
@@ -331,6 +325,7 @@ def main(config):
     # your implementation is working. Do check how the training is going on by
     # looking at `loss_epoch` `tr_acc_epoch` and `va_acc_epoch`
     losses = np.array([tr['loss_epoch'] for tr in train_res])
+    losses /= len(losses)
     accs = np.array([max(*tr['va_acc_epoch']) for tr in train_res])
     avg_loss = losses.mean()
     avg_acc = accs.mean()
