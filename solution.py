@@ -31,7 +31,7 @@ def compute_loss(W, b, x, y, config):
             config.model_type))
 
     loss, loss_c, pred = model_loss(W, b, x, y)
-    loss += config.reg_lambda * l2_loss(W)
+    # loss += config.reg_lambda * l2_loss(W)
 
     return loss, loss_c, pred
 

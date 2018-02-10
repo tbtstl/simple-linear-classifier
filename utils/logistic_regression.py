@@ -82,23 +82,24 @@ def model_loss(W, b, x, y):
 
     """
 
-    # TODO: Compute pred
-    pred = model_predict(W, b, x)
-    # pred -= np.max(pred, axis=1, keepdims=True)
+    # Compute pred
+    s_all = np.matmul(x, W) + b
+    pred = np.argmax(s_all, axis=1)
 
-    # TODO: Compute probs
-    probs = _softmax(pred)
-    # correct_probs = probs[y]
+    # Compute probs
+    probs = _softmax(s_all)
 
-    # TODO: Compute loss
-    loss_c = -1 * y*np.log(probs) + (1 - y) * np.log(1 - probs)
-    # Summarize across classes that aren't classified correctly
-    loss = np.mean(loss_c)
+    # Compute loss
+    C = b.shape[0]
+    N = y.shape[0]
+    targets = np.zeros((N, C))
+    targets[np.arange(N), pred] = 1
+    loss = np.mean(targets*np.log(probs))
 
-    return loss, loss_c, pred
+    return loss, probs, pred
 
 
-def model_grad(loss_c, x, y):
+def model_grad(probs, x, y):
     """Gradient.
 
     Parameters
@@ -130,13 +131,20 @@ def model_grad(loss_c, x, y):
     # y : (N, )
 
     N, D = x.shape
-    C = loss_c.shape[1]
+    C = probs.shape[1]
 
+    # One-hot encoded targets
+    targets = np.zeros((N, C))
+    targets[np.arange(N), y] = 1
 
-    # TODO: Compute dW
-    dW = np.mean((_softmax(x) - y)*x)
+    # Calculate loss gradient w.r.t. probs
+    grad = (probs - targets) / N
 
-    # TODO: Compute db
+    # Compute dW
+    dW = x.T.dot(grad)
+
+    # Compute db
+    db = np.sum(grad, axis=0)
 
     return dW, db
 
